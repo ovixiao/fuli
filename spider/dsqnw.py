@@ -3,6 +3,7 @@
 from scrapy import Spider, Request
 from scrapy.selector import Selector
 from datetime import datetime
+import utils
 
 
 class DiaoSiQingNian(Spider):
@@ -17,9 +18,11 @@ class DiaoSiQingNian(Spider):
                 title = item.xpath('div/div[2]/h2/a/text()').extract()[0]
                 # link URL
                 url = item.xpath('div/div[2]/h2/a/@href').extract()[0]
-                description = item.xpath('div/div[2]/div/div/text()').extract()[0].strip()
+                description = item.xpath('div/div[2]/div/div/text()').extract()[0]
+                description = utils.join_text(description)
                 # image URL
                 img = item.xpath('div/div[1]/a/img/@src').extract()[0]
+                tags = item.xpath('div/div[2]/div/div/div/div[2]/a/text()').extract()
                 # YYYY/M/D
                 date = item.xpath('div/div[2]/div/div/div/div[3]/a/text()').extract()[0]
                 date = datetime.strptime(date, '%Y/%m/%d')
