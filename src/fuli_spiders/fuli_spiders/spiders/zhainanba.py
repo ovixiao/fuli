@@ -1,25 +1,28 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from scrapy import Spider, Request
+from scrapy import Request
 from scrapy.selector import Selector
 from datetime import datetime
-import utils
+from base import BaseSpider
+import db
 
 
-class ZhaiNanBa(Spider):
-    name = 'zhainanba.net'
+class ZhaiNanBa(BaseSpider):
+    name = 'zhainanba'
+    ch_name = u'宅男吧'
     start_urls = ['http://zhainanba.net']
 
     def parse(self, response):
         selector = Selector(response=response)
         articles = selector.xpath('/html/body/section/div/div/article')
+        timeline = db.get_collection('timeline')
         for item in articles:
             try:
                 title = item.xpath('header/h2/a/text()').extract()[0]
                 # link URL
                 url = item.xpath('header/h2/a/@href').extract()[0]
                 description = item.xpath('p[3]/text()').extract()[0]
-                description = utils.join_text(description)
+                description = self._join_text(description)
                 # image URL
                 img = item.xpath('p[2]/a/img/@src').extract()[0]
                 # [tag1, tag2, ...]
@@ -30,6 +33,8 @@ class ZhaiNanBa(Spider):
                 date = datetime.strptime(date, '%Y-%m-%d')
                 # label of category
                 category = item.xpath('header/a/text()').extract()[0]
+                self.save(title=title, url=url, description=description,
+                          img=img, tags=tags, date=date, category=category)
             except IndexError:
                 continue
 

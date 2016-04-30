@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from scrapy import Spider, Request
+from scrapy import Request
 from scrapy.selector import Selector
-import utils
+from base import BaseSpider
 
 
-class FuLiDang(Spider):
-    name = 'fulidang.com'
+class FuLiDang(BaseSpider):
+    name = 'fulidang'
+    ch_name = u'福利档'
     start_urls = ['http://www.fulidang.com/page/1']
 
     def parse(self, response):
@@ -18,14 +19,16 @@ class FuLiDang(Spider):
                 # link URL
                 url = item.xpath('header/h2/a/@href').extract()[0]
                 description = item.xpath('span/text()').extract()[0]
-                description = utils.join_text(description)
+                description = self._join_text(description)
                 # image URL
                 img = item.xpath('div/a/img/@src').extract()[0]
                 # YYYY-MM-DD
                 date = item.xpath('p/span[1]/text()').extract()[0]
-                date = utils.parse_date(date)
+                date = self._parse_date(date)
                 # label of category
                 category = item.xpath('header/a/text()').extract()[0]
+                self.save(title=title, url=url, description=description,
+                          img=img, date=date, category=category)
             except IndexError:
                 continue
 
