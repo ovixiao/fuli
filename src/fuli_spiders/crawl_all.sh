@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 spider_list=(
     youdianying
     flkong

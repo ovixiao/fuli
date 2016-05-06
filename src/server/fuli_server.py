@@ -94,4 +94,4 @@ def index():
     return page(1)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, host='172.18.190.29')
+    app.run(debug=False, port=8001)
