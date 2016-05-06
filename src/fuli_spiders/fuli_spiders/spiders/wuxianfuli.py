@@ -10,6 +10,7 @@ class WuXianFuLi(BaseSpider):
     name = 'wuxianfuli'
     ch_name = u'无限福利'
     start_urls = ['http://wuxianfuli.cc/']
+    white_list = set([u'日系写真', u'国产美图'])
 
     def parse(self, response):
         selector = Selector(response=response)
@@ -30,6 +31,9 @@ class WuXianFuLi(BaseSpider):
                 date = datetime.strptime(date, '%Y-%m-%d')
                 # label of category
                 category = item.xpath('header/a/text()').extract()[0]
+                if category not in self.__class__.white_list:
+                    continue
+
                 self.save(title=title, url=url, description=description,
                           img=img, tags=tags, date=date, category=category)
             except IndexError:

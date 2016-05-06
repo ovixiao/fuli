@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+import os
 import sys
-# insert lib path
-sys.path.insert(0, '../libs')
 import json
 import math
 import pymongo
 from flask import Flask, request
 from flask import render_template
 from flask.ext.bootstrap import Bootstrap
+
+
+def add_python_path(path):
+    lib_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
+    if lib_path != sys.path[0]:
+        sys.path.insert(0, lib_path)
+
+
+add_python_path('../libs')
 import db
+import config
 
 
 app = Flask(__name__)
@@ -46,6 +55,8 @@ def get_pagination(page, total, range_num=3):
 @app.route('/page/<page>')
 def page(page):
     ln = 10
+    conf = config.get_config()
+    cdn_domain = conf.get('cdn', 'domain')
     try:
         page = int(page)
     except ValueError:
@@ -57,7 +68,6 @@ def page(page):
         limit=ln,
         sort=[('date', pymongo.DESCENDING)],
     )
-        #{'date': {'$exist': True}},
     items = []
     for item in db_items:
         try:
@@ -65,6 +75,7 @@ def page(page):
         except:
             pass
         item['_id'] = str(item['_id'])
+        item['cdn_path'] = os.path.join(cdn_domain, item['cdn_path'])
         items.append(item)
 
     # pagination
@@ -83,4 +94,4 @@ def index():
     return page(1)
 
 if __name__ == '__main__':
-    app.run(debug=True, host="192.168.3.104", port=8888)
+    app.run(debug=True, port=8888, host='172.18.190.29')

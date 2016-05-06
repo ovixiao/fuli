@@ -11,6 +11,7 @@ class FuLiKong(BaseSpider):
     name = 'flkong'
     ch_name = u'福利控'
     start_urls = ['http://www.flkong.net']
+    white_list = set([u'宅男·福利', u'精品·福利', u'美图集'])
 
     def parse(self, response):
         selector = Selector(response=response)
@@ -33,6 +34,9 @@ class FuLiKong(BaseSpider):
                 date = self._parse_date(date)
                 # label of category
                 category = item.xpath('header/a/text()').extract()[0]
+                if category not in self.__class__.white_list:
+                    continue
+
                 self.save(title=title, url=url, description=description,
                           img=img, tags=tags, date=date, category=category)
             except IndexError:

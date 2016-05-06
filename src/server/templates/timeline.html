@@ -17,7 +17,7 @@
         {% for item in items %}
             <div class="item row">
                 <div class="title col-xs-12"><kbd>{{item['ch_src']}}</kbd><a target="_blank" href="{{item['url']}}">{{item['title']}}</a></div>
-                <div class="thumb col-xs-4"><a target="_blank" href="{{item['url']}}"><img src="{{item['img']}}" /></a></div>
+                <div class="thumb col-xs-4"><a target="_blank" href="{{item['url']}}"><img src="{{item['cdn_path']}}" /></a></div>
                 <div class="description col-xs-8"><p>{{item['description']}}</p></div>
             </div>
         {% endfor %}

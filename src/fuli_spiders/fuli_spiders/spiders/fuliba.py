@@ -9,10 +9,11 @@ from base import BaseSpider
 class FuLiBa(BaseSpider):
     name = 'fuliba'
     ch_name = u'福利吧'
-    start_urls = ['http://fuliba.net']
+    #start_urls = ['http://fuliba.net']
+    start_urls = ['http://fuliba.net/category/haohaizikanbujian']
 
     def parse(self, response):
-        response.replace(body=response.body.replace("<!--", "").replace("-->", ""))
+        #response.replace(body=response.body.replace("<!--", "").replace("-->", ""))
         selector = Selector(response=response)
         articles = selector.xpath('//*[@id="content"]/article')
         for item in articles:
@@ -26,8 +27,8 @@ class FuLiBa(BaseSpider):
                 img = item.xpath('div/p/a/img/@src').extract()[0]
                 # YYYY-MM-DD
                 date = item.xpath('address/text()').extract()[0]
-                date = date.split("(")[1][:-1]
-                date = datetime.strptime(date, '%Y-%m-%d %H:%M')
+                date = date.strip().split("|", 1)[0].strip()
+                date = datetime.strptime(date, '%d,%m,%Y')
                 # label of category
                 category = item.xpath('header/div[1]/div[1]/a/text()').extract()[0]
                 self.save(title=title, url=url, description=description,
@@ -35,5 +36,5 @@ class FuLiBa(BaseSpider):
             except IndexError:
                 continue
 
-        next_page = selector.xpath(u'//*[@id="content-page"]/a[text()="下一页"]/@href').extract()[0]
+        next_page = selector.xpath(u'//*[@class="content-page"]/a[text()="下一页"]/@href').extract()[0]
         yield Request(response.urljoin(next_page), self.parse)

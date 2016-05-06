@@ -9,6 +9,8 @@ class FuLiDang(BaseSpider):
     name = 'fulidang'
     ch_name = u'福利档'
     start_urls = ['http://www.fulidang.com/page/1']
+    white_list = set([u'求出处', u'美图集', u'门事件', u'番号档', u'艺人档',
+                      u'Rosi', u'Disi', u'Tuigirl', u'Ru1mm'])
 
     def parse(self, response):
         selector = Selector(response=response)
@@ -27,6 +29,9 @@ class FuLiDang(BaseSpider):
                 date = self._parse_date(date)
                 # label of category
                 category = item.xpath('header/a/text()').extract()[0]
+                if category not in self.__class__.white_list:
+                    continue
+
                 self.save(title=title, url=url, description=description,
                           img=img, date=date, category=category)
             except IndexError:

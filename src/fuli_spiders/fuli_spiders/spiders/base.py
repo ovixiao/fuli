@@ -2,8 +2,10 @@
 # -*- encoding: utf-8 -*-
 from scrapy import Spider
 from datetime import datetime, timedelta
+from pymongo.errors import DuplicateKeyError
 import os
 import sys
+import md5
 
 
 def add_python_path(path):
@@ -15,8 +17,12 @@ def add_python_path(path):
 # lib of fuli spider
 add_python_path('../../../libs')
 import db
+import cdn
 
 class BaseSpider(Spider):
+
+    exist_count = 0
+    img_store = cdn.CDN()
 
     @staticmethod
     def _parse_date(date):
@@ -55,7 +61,26 @@ class BaseSpider(Spider):
         return u''.join([x.strip() for x in text_splited])
 
     def save(self, **kwargs):
-        kwargs['src'] = self.__class__.name
-        kwargs['ch_src'] = self.__class__.ch_name
-        timeline = db.get_collection('timeline')
-        timeline.insert(kwargs)
+        if self.__class__.exist_count > 10:
+            raise RuntimeError('Exceed maximum retry times for database')
+
+        try:
+            # add source and chinese source
+            kwargs['src'] = self.__class__.name
+            kwargs['ch_src'] = self.__class__.ch_name
+
+            # make cdn path
+            img_url = kwargs['img'].encode("utf-8")
+            cdn_path = md5.new(img_url).hexdigest()
+            kwargs['cdn_path'] = cdn_path.decode("utf-8")
+
+            # insert into database
+            timeline = db.get_collection('timeline')
+            timeline.insert(kwargs)
+
+            # actually upload image here
+            if not self.__class__.img_store.exists(cdn_path):
+                self.__class__.img_store.upload_remote_image(cdn_path, img_url)
+
+        except DuplicateKeyError:
+            self.__class__.exist_count += 1
