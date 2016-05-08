@@ -5,9 +5,9 @@ import sys
 import json
 import math
 import pymongo
+import argparse
 from flask import Flask, request
 from flask import render_template
-from flask.ext.bootstrap import Bootstrap
 
 
 def add_python_path(path):
@@ -19,41 +19,14 @@ def add_python_path(path):
 add_python_path('../libs')
 import db
 import config
+import log
+from pagenavi import PageNavi
 
 
 app = Flask(__name__)
-bootstrap = Bootstrap(app)
 
 
-def get_pagination(page, total, range_num=3):
-    page_list = []
-    # left
-    for i in xrange(range_num, 0, -1):
-        cur_page = page - i
-        if cur_page > 0:
-            page_list.append(cur_page)
-
-    # current
-    page_list.append(page)
-
-    # right
-    for i in xrange(1, range_num + 1):
-        cur_page = page + i
-        if page < cur_page <= total:
-            page_list.append(cur_page)
-
-    prev_page = max(1, page - 1)
-    next_page = min(total, page + 1)
-
-    ret = {
-        'first_page': 1, 'last_page': total, 'page_list': page_list,
-        'prev_page': prev_page, 'next_page': next_page, 'cur_page': page,
-    }
-    return ret
-
-
-@app.route('/page/<page>')
-def page(page):
+def gen_posts(page):
     ln = 10
     conf = config.get_config()
     cdn_domain = conf.get('cdn', 'domain')
@@ -75,23 +48,40 @@ def page(page):
         except:
             pass
         item['_id'] = str(item['_id'])
+        if len(item['description']) > 120:
+            item['description'] = item['description'][:120] + '...'
         item['cdn_path'] = os.path.join(cdn_domain, item['cdn_path'])
         items.append(item)
+    return items
 
-    # pagination
-    total = int(math.ceil(float(timeline.find().count()) / ln))
-    pagination = get_pagination(page, total)
 
-    return render_template(
-        'timeline.html',
-        items=items,
-        pagination=pagination,
-    )
+def gen_navi_items():
+    navi_items = [
+        {'name': u'福利', 'url': '#'},
+        {'name': u'tumblr', 'url': '#'},
+        {'name': u'买家秀', 'url': '#'},
+    ]
+    return navi_items
 
 
 @app.route('/')
 def index():
-    return page(1)
+    page = 1
+    page_navi = PageNavi(1, 10)
+    navi_items = gen_navi_items()
+    posts = gen_posts(page)
+    return render_template(
+        'index.html',
+        navi_items=navi_items,
+        posts=posts,
+        page_navi=page_navi,
+    )
+
 
 if __name__ == '__main__':
-    app.run(debug=False, port=8001)
+    parser = argparse.ArgumentParser(description='download logs')
+    parser.add_argument('--debug', action='store_true', dest='debug',
+                        help='Start server in debug mode', default=False)
+    args = parser.parse_args()
+
+    app.run(debug=args.debug, port=8888)

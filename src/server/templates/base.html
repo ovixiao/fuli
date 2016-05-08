@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <title>福利聚合 - 宅男爱美女内容你懂的</title>
+        <meta name="keywords" content="宅男,福利,屌丝,撸,美女,性感,你懂的,你懂得,gif,动图,泳装,老司机,1024">
+        <meta name="description" content="福利聚合聚合福利">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!--link rel="stylesheet" href="./static/style_2.css" type="text/css" media="screen"-->
+        <link rel="stylesheet" href="./static/style.css" type="text/css" media="screen">
+        {% block head %}{% endblock %}
+    </head>
+
+    <body>
+        <!-- BEGIN wrapper -->
+        <div id="wrapper">
+            <!-- BEGIN header -->
+            <div id="header">
+                <div class="logo">
+                    <img src='./static/logo.png'>
+                </div>
+                <div class="break"></div>
+                <div class="navi">
+                    <ul class="navi-items">
+                        {% for navi_item in navi_items %}
+                            <li class="navi-item"><a href={{navi_item['url']}}>{{navi_item['name']}}</a></li>
+                        {% endfor %}
+                    </ul>
+                    <div class="break"></div>
+                </div>
+            </div>
+            <!-- END header -->
+
+            <!-- BEGIN body -->
+            <div id="body">
+                <div class="content">
+                    <div class="posts">{% block posts %}{% endblock %}</div>
+                    <div class="pagenavi">{% block pagenavi %}{% endblock %}</div>
+                </div>
+                <div class="sidebar">
+                    {% block sidebar %}{% endblock %}
+                </div>
+            </div>
+            <!-- END body -->
+
+            <!-- BEGIN footer -->
+            <div id="footer"></div>
+            <!-- END footer -->
+        </div>
+        <!-- END wrapper -->
+    </body>
+
+</html>

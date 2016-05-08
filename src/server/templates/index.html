@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block posts %}
+    {% for item in posts %}
+    <div class="post">
+        <div class="thumb">
+            <a href="{{item['url']}}"><img src="{{item['cdn_path']}}"></a>
+        </div>
+        <div class="text">
+            <h2><a href="{{item['url']}}">{{item['title']}}</a></h2>
+            {{item['description']}}
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
+
+
+{% block pagenavi %}
+    <ul>
+        {% for page in page_navi.page_list %}
+            <li><a href="/page/{{page}}">{{page}}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

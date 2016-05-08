@@ -9,7 +9,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 
 __inited_loggers = {}
-__all__ = ['get_logger']
+__all__ = ['get_logger', 'MultiProcessingTimedRotatingFileHandler']
 
 # the code of output strings. Default is UTF-8
 CODE = 'utf-8'
@@ -204,7 +204,7 @@ def get_logger(name, **kwargs):
         # path of log file
         log_path = os.path.join(
             log_dir,
-            '{0}_log'.format(name),
+            '{0}.log'.format(name),
         )
         __init_logger(name, log_path, logging.DEBUG)
 
