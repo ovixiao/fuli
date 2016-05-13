@@ -6,6 +6,7 @@ import json
 import math
 import pymongo
 import argparse
+from bson.objectid import ObjectId
 from flask import Flask, request
 from flask import render_template
 
@@ -20,61 +21,54 @@ add_python_path('../libs')
 import db
 import config
 import log
-from pagenavi import PageNavi
+import utils
 
 
 app = Flask(__name__)
 
 
-def gen_posts(page):
-    ln = 10
-    conf = config.get_config()
-    cdn_domain = conf.get('cdn', 'domain')
-    try:
-        page = int(page)
-    except ValueError:
-        page = 1
-
-    timeline = db.get_collection('timeline')
-    db_items = timeline.find(
-        skip=(page - 1) * ln,
-        limit=ln,
-        sort=[('date', pymongo.DESCENDING)],
+def get_posts(page=1, ln=10):
+    tumblr = db.get_collection('tumblr')
+    skip = (page - 1) * ln
+    items = tumblr.find(
+        {'type': 'video', 'video_url': {'$exists': True}},
+        projection={'player': False},
+        skip=skip, limit=ln, sort=[('date', -1)]
     )
-    items = []
-    for item in db_items:
-        try:
-            item['date'] = str(item['date'].strftime('%Y-%m-%d'))
-        except:
-            pass
-        item['_id'] = str(item['_id'])
-        if len(item['description']) > 120:
-            item['description'] = item['description'][:120] + '...'
-        item['cdn_path'] = os.path.join(cdn_domain, item['cdn_path'])
-        items.append(item)
-    return items
+    ret_items = []
+    for item in items:
+        dur = item['duration']
+        item['duration'] = '{:02d}:{:02d}'.format(dur / 60, dur % 60)
+        item['date'] = utils.pretty_date(item['timestamp'])
+        ret_items.append(item)
 
-
-def gen_navi_items():
-    navi_items = [
-        {'name': u'福利', 'url': '#'},
-        {'name': u'tumblr', 'url': '#'},
-        {'name': u'买家秀', 'url': '#'},
-    ]
-    return navi_items
+    return ret_items
 
 
 @app.route('/')
-def index():
-    page = 1
-    page_navi = PageNavi(1, 10)
+@app.route('/page/<p>')
+def page(p=1):
+    p = int(p)
+    ln = 10
+    page_navi = PageNavi(page, 785 / ln)
     navi_items = gen_navi_items()
-    posts = gen_posts(page)
+    posts = get_posts(p, ln)
     return render_template(
-        'index.html',
-        navi_items=navi_items,
+        'page.html',
+        title=u"福利聚合",
+        description=u"宅男爱美女",
+        cur_page=p,
+    )
+
+
+@app.route('/append/<p>')
+def append(p):
+    p = int(p)
+    ln = 10
+    posts = get_posts(p, ln)
+    return render_template(
+        'append.html',
         posts=posts,
-        page_navi=page_navi,
     )
 
 

@@ -1,0 +1,18 @@
+{% for post in posts %}
+<div class="card demo-card-header-pic">
+  <div valign="bottom" class="card-header color-white no-border no-padding">
+    <video controls poster="{{ post['thumbnail_url'] }}">
+      <source src="{{ post['video_url'] }}">
+    </video>
+  </div>
+  <div class="card-content">
+    <div class="card-content-inner">
+      <p class="color-gray">发表于 {{ post['date'] }}</p>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="{{ post['source_url'] }}" class="link">原链</a>
+    <a href="//{{ post['blog_name'] }}.tumblr.com" class="link">{{ post['blog_name'] }}</a>
+  </div>
+</div>
+{% endfor %}

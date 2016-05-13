@@ -12,7 +12,7 @@ class DB(object):
 
     def __init__(self):
         self._db = self._init_db()
-        self._init_index()
+        #self._init_index()
 
     def _init_db(self):
         conf = config.get_config()
@@ -23,9 +23,15 @@ class DB(object):
         return client[conf.get('database', 'name')]
 
     def _init_index(self):
-        self._db.timeline.create_index([('date', pymongo.DESCENDING)])
-        self._db.timeline.create_index([('url', pymongo.ASCENDING)],
-                                       unique=True)
+        # timeline collection
+        # store websites
+        self._db.timeline.create_index(
+            [('date', pymongo.DESCENDING)]
+        )
+        self._db.timeline.create_index(
+            [('url', pymongo.ASCENDING)], unique=True
+        )
+
 
     def __getattr__(self, name):
         return self._db.__getattr__(name)
