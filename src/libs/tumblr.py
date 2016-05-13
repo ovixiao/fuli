@@ -66,7 +66,6 @@ class Tumblr(object):
 
     def update_user(self, item):
         item['latest_update_date'] = datetime.now()
-        self._logger.info('update_user', user=item['user'])
         return self._users.save(item)
 
     def get_posts(self, user):
@@ -98,8 +97,10 @@ class Tumblr(object):
 
     def update(self):
         users = self.get_users()
+        self._logger.info('start_update')
         for user_info in users:
             user = user_info['user']
+            self._logger.info('update_user', user=user)
             self.get_posts(user)
             self.update_user(user_info)
 
