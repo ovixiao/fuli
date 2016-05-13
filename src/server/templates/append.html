@@ -1,9 +1,7 @@
 {% for post in posts %}
 <div class="card demo-card-header-pic">
   <div valign="bottom" class="card-header color-white no-border no-padding">
-    <video controls poster="{{ post['thumbnail_url'] }}" preload="auto">
-      <source src="{{ post['video_url'] }}">
-    </video>
+    <video controls poster="{{ post['thumbnail_url'] }}" preload="none" src="{{ post['video_url'] }}">浏览器不支持, 请更换浏览器</video>
   </div>
   <div class="card-content">
     <div class="card-content-inner">
