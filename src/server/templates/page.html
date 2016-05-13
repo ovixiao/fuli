@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+<style>
+body{max-width: 500px; margin: auto;}
+.infinite-scroll-preloader{margin-top:-20px;}
+video{width: 100%;}
+#next-page{display: none};
+</style>
+{% endblock %}
+
 
 {% block cards %}
 <div class="content infinite-scroll infinite-scroll-bottom" data-distance="50">
@@ -8,48 +18,21 @@
   <div class="infinite-scroll-preloader">
     <div class="preloader"></div>
   </div>
+  <p><a id="next-page" href="#" class="button button-big button-round">下一页</a></p>
 </div>
 
 <script>
-$.initPage();
+//$(document).ready(function() {
+  var loading = false;
+  var maxPage = {{ cur_page + 2 }};
+  curPage = {{ cur_page }};
 
-var loading = false;
-var maxPage = 3;
-curPage = {{ cur_page }};
-
-function addPage(page) {
-  $.get("/append/" + page, function(data) {
-    $('.infinite-scroll-bottom .cards').append(data);
-  });
-}
-
-addPage(curPage);
-curPage += 1;
-
-// 注册'infinite'事件处理函数
-$(document).on('infinite', '.infinite-scroll-bottom', function() {
-  // 如果正在加载，则退出
-  if (loading) return;
-  // 设置flag
-  loading = true;
-  console.log(curPage);
-  setTimeout(function() {
-    // 重置加载flag
-    if (curPage > maxPage) {
-      // 加载完毕，则注销无限加载事件，以防不必要的加载
-      $.detachInfiniteScroll($('.infinite-scroll'));
-      // 删除加载提示符
-      $('.infinite-scroll-preloader').remove();
-      return;
-    }
-    // 添加新条目
-    addPage(curPage);
-    curPage += 1;
-    //容器发生改变,如果是js滚动，需要刷新滚动
-    $.refreshScroller();
-    loading = false;
-  }, 1000);
- });
+  $.initPage();
+  addPage(curPage);
+  curPage += 1;
+  // 注册'infinite'事件处理函数
+  $(document).on('infinite', '.infinite-scroll-bottom', infinite_scroll);
+//});
 </script>
 
 {% endblock %}
