@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-import pytumblr
-import pymongo
-from datetime import datetime
-from math import ceil
 import db
+import log
+import time
+import pymongo
+import pytumblr
+from math import ceil
+from datetime import datetime
+
+
+class BreakThroughExce(Exception):
+    pass
 
 
 class Tumblr(object):
@@ -19,6 +25,7 @@ class Tumblr(object):
             'PhOvmPxBrYwVXvgFaDDdjJ5mtYWhqtHph2MnY7iplF9YcrUqnT'
         )
         self._init_db()
+        self._logger = log.get_logger('update')
 
     def _init_db(self):
         self._tumblr = db.get_collection('tumblr')
@@ -59,6 +66,7 @@ class Tumblr(object):
 
     def update_user(self, item):
         item['latest_update_date'] = datetime.now()
+        self._logger.info('update_user', user=item['user'])
         return self._users.save(item)
 
     def get_posts(self, user):
@@ -66,14 +74,27 @@ class Tumblr(object):
         info = self._client.blog_info(user)
         total = info['blog']['posts']
         limit = 20  # 20 posts per request
-        for i in xrange(int(ceil(total / float(limit)))):
-            offset = i * limit
-            posts = self._client.posts(user, limit=limit, offset=offset)
-            for post in posts['posts']:
-                try:
-                    self._tumblr.insert(post)
-                except pymongo.errors.DuplicateKeyError:
-                    continue
+        now = int(time.time())
+        try:
+            for i in xrange(int(ceil(total / float(limit)))):
+                offset = i * limit
+                posts = self._client.posts(user, limit=limit, offset=offset)
+                for post in posts['posts']:
+                    try:
+                        # ignore those that later than 1 day
+                        if now - post['timestamp'] > 86400:
+                            raise BreakThroughExce()
+
+                        self._tumblr.insert(post)
+                    except pymongo.errors.DuplicateKeyError:
+                        continue
+                    else:
+                        self._logger.info(
+                            'add_post', user=user, url=post['post_url'],
+                            type=post['type'],
+                        )
+        except BreakThroughExce:
+            pass
 
     def update(self):
         users = self.get_users()
@@ -85,12 +106,4 @@ class Tumblr(object):
 
 if __name__ == '__main__':
     tumblr = Tumblr()
-    #tumblr.update()
-    for line in sys.stdin:
-        line = line.strip()
-        tumblr.add_user(line)
-    #posts = tumblr.posts('codingjester.tumblr.com')
-    #for i, post in enumerate(posts):
-    #    if i > 10:
-    #        break
-    #    print json.dumps(post)
+    tumblr.update()
