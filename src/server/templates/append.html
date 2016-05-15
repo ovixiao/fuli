@@ -1,11 +1,9 @@
 {% for post in posts %}
   {% if loop.length > 0 %}
-    <div class="card demo-card-header-pic">
+    <div class="card">
       <div valign="bottom" class="card-header color-white no-border no-padding">
         {% if type == 'gif' %}
-          <a href="{{ post['ori_size']['url'] }}">
-            <img src="{{ post['alt_size']['url'] }}">
-          </a>
+          <img src="{{ post['ori_size']['url'] }}" class="gif">
         {% else %}
           <video controls poster="{{ post['thumbnail_url'] }}" preload="none" src="{{ post['video_url'] }}">浏览器不支持, 请更换浏览器</video>
         {% endif %}

@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import copy
 import argparse
 from flask import Flask, request
 from flask import render_template
@@ -72,10 +73,10 @@ def get_posts(page=1, ln=10, t='video'):
             photos = item['photos']
             del item['photos']
             for photo in photos:
-                item['alt_size'] = photo['alt_sizes'][1]
-                print item['alt_size']
-                item['ori_size'] = photo['original_size']
-                yield item
+                tmp_photo = copy.copy(item)
+                tmp_photo['alt_size'] = photo['alt_sizes'][1]
+                tmp_photo['ori_size'] = photo['original_size']
+                yield tmp_photo
 
 
 @app.route('/')
