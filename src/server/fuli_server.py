@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 import os
+import re
 import sys
 import argparse
 from flask import Flask, request
@@ -22,65 +23,89 @@ import utils
 
 TITLE = u'福利聚合'
 DESC = u'各种福利滑滑就有'
-LN = 5
+LN_VIDEO= 5
+LN_GIF = 5
+RE_GIF = re.compile('.+\.gif$')
 logger = log.get_logger('fuli')
 
 app = Flask(__name__)
 
 
-def get_posts(page=1, ln=10):
+def get_posts(page=1, ln=10, t='video'):
     """Get posts of tumblr.
 
     Args:
         page: the page number. default is 1.
-        ln: item number per page. default is 10.
+        ln: the item number per page. default is 10.
+        t: the type of posts. default is `video`.
 
     Returns:
         return a generator including the processed post informations.
     """
     page = int(page)
     ln = int(ln)
-    # tumblr collection
+    items = []
     tumblr = db.get_collection('tumblr')
     skip = (page - 1) * ln
-    items = tumblr.find(
-        {'type': 'video', 'video_url': {'$exists': True}},
-        projection={'video_url': True, 'thumbnail_url': True,
-                    'timestamp': True, 'blog_name': True, 'short_url': True,
-                    'duration': True},
-        skip=skip, limit=ln, sort=[('date', -1)]
-    )
-    for item in items:
-        dur = item['duration']
-        item['duration'] = '{0:02d}:{1:02d}'.format(*divmod(dur, 60))
-        item['date'] = utils.pretty_date(item['timestamp'])
-        yield item
+    if t == 'video':
+        items = tumblr.find(
+            {'type': 'video', 'video_url': {'$exists': True}},
+            projection={'video_url': True, 'thumbnail_url': True,
+                        'timestamp': True, 'blog_name': True, 'short_url': True,
+                        'duration': True},
+            skip=skip, limit=ln, sort=[('date', -1)]
+        )
+        for item in items:
+            dur = item['duration']
+            item['duration'] = '{0:02d}:{1:02d}'.format(*divmod(dur, 60))
+            item['date'] = utils.pretty_date(item['timestamp'])
+            yield item
+    elif t == 'gif':
+        items = tumblr.find(
+            {'type': 'photo', 'photos.original_size.url': RE_GIF},
+            projection={'photos': True, 'timestamp': True, 'blog_name': True,
+                        'short_url': True},
+            skip=skip, limit=ln, sort=[('date', -1)]
+        )
+        for item in items:
+            item['date'] = utils.pretty_date(item['timestamp'])
+            photos = item['photos']
+            del item['photos']
+            for photo in photos:
+                item['alt_size'] = photo['alt_sizes'][1]
+                print item['alt_size']
+                item['ori_size'] = photo['original_size']
+                yield item
 
 
 @app.route('/')
-@app.route('/page/<p>')
-def page(p=1):
+@app.route('/<t>')
+@app.route('/<t>/<p>')
+def page(t='video', p=1):
     """Page contents.
 
     Args:
+        t: the type of content. default is `video`
         p: the page number. default is 1.
     """
-    posts = get_posts(p, LN)
-    logger.info(uri='page', p=p)
+    logger.info(uri='page', p=p, t=t)
+    # all other invalid types are `video`
+    if t != 'gif':
+        t = 'video'
     return render_template('page.html', title=TITLE, description=DESC,
-                           cur_page=int(p))
+                           cur_page=int(p), type=t)
 
 
-@app.route('/append/<p>')
-def append(p):
-    """Generate data for appending.
+@app.route('/append/<t>/<p>')
+def append(t='video', p=1):
+    """Generate video for appending.
 
     Args:
-        p: the page number.
+        t: the type of content. default is `video`
+        p: the page number. default is 1.
     """
-    posts = get_posts(p, LN)
-    logger.info(uri='append', p=p)
-    return render_template('append.html', posts=posts)
+    posts = get_posts(p, LN_VIDEO, t)
+    return render_template('append.html', posts=posts, type=t)
 
 
 def main():

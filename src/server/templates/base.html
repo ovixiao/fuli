@@ -21,6 +21,17 @@
 
   <body>
     <header class="bar bar-nav"><h1 class="title">{{ title }}</h1></header>
+    <nav class="bar bar-tab">
+      <a class="tab-item external active" href="/video" id="video-tab">
+        <span class="icon icon-download"></span>
+        <span class="tab-label">视频</span>
+      </a>
+      <a class="tab-item external" href="/gif" id="gif-tab">
+        <span class="icon icon-emoji"></span>
+        <span class="tab-label">GIF</span>
+        <span class="badge">NEW</span>
+      </a>
+    </nav>
     {% block cards %}{% endblock %}
   </body>
   <script src="http://s95.cnzz.com/z_stat.php?id=1259005270&web_id=1259005270" language="JavaScript"></script>
