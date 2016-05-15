@@ -17,7 +17,7 @@ function infinite_scroll() {
       $.detachInfiniteScroll($('.infinite-scroll'));
       // 删除加载提示符
       $('.infinite-scroll-preloader').remove();
-      $('#next-page').attr('href', '/' + type + '/' + curPage);
+      $('#next-page').attr('href', '/page/' + type + '/' + curPage);
       $('#next-page').css('display', 'block');
       return;
     }

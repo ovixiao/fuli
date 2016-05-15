@@ -80,8 +80,9 @@ def get_posts(page=1, ln=10, t='video'):
 
 
 @app.route('/')
-@app.route('/<t>')
-@app.route('/<t>/<p>')
+@app.route('/page')
+@app.route('/page/<t>')
+@app.route('/page/<t>/<p>')
 def page(t='video', p=1):
     """Page contents.
 
