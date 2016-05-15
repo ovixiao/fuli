@@ -74,7 +74,8 @@ def get_posts(page=1, ln=10, t='video'):
             del item['photos']
             for photo in photos:
                 tmp_photo = copy.copy(item)
-                tmp_photo['alt_size'] = photo['alt_sizes'][1]
+                if not photo['original_size']['url'].endswith('.gif'):
+                    continue
                 tmp_photo['ori_size'] = photo['original_size']
                 yield tmp_photo
 
