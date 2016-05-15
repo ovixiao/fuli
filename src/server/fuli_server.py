@@ -24,8 +24,7 @@ import utils
 
 TITLE = u'福利聚合'
 DESC = u'各种福利滑滑就有'
-LN_VIDEO= 5
-LN_GIF = 5
+LN= 5
 RE_GIF = re.compile('.+\.gif$')
 logger = log.get_logger('fuli')
 
@@ -73,11 +72,11 @@ def get_posts(page=1, ln=10, t='video'):
             photos = item['photos']
             del item['photos']
             for photo in photos:
-                tmp_photo = copy.copy(item)
                 if not photo['original_size']['url'].endswith('.gif'):
                     continue
-                tmp_photo['ori_size'] = photo['original_size']
-                yield tmp_photo
+                item['ori_size'] = photo['original_size']
+                yield item
+                break
 
 
 @app.route('/')
@@ -107,7 +106,8 @@ def append(t='video', p=1):
         t: the type of content. default is `video`
         p: the page number. default is 1.
     """
-    posts = get_posts(p, LN_VIDEO, t)
+    posts = get_posts(p, LN, t)
+    logger.info(uri='append', p=p, t=t)
     return render_template('append.html', posts=posts, type=t)
 
 

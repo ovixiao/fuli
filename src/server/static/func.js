@@ -9,7 +9,6 @@ function infinite_scroll() {
   if (loading) return;
   // 设置flag
   loading = true;
-  console.log(curPage);
   setTimeout(function() {
     // 重置加载flag
     if (curPage > maxPage) {
