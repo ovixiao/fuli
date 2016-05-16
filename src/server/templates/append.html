@@ -15,7 +15,9 @@
       </div>
       {% if 'summary' in post %}
         <div class="card-content">
-          <p>{{ post['summary'] }}</p>
+          <div class="card-content-inner">
+            <p>{{ post['summary'] }}</p>
+          </div>
         </div>
       {% endif %}
       <div class="card-footer">

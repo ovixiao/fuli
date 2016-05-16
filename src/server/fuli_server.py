@@ -139,7 +139,7 @@ def main():
                         help='Start server in DEBUG mode', default=False)
     args = parser.parse_args()
 
-    app.run(debug=args.debug, port=8691, host="172.18.190.31")
+    app.run(debug=args.debug, port=8691)
 
 
 if __name__ == '__main__':
