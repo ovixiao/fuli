@@ -5,6 +5,8 @@ import re
 import sys
 import copy
 import argparse
+import ujson as json
+from base64 import b64encode, b64decode
 from flask import Flask, request
 from flask import render_template
 
@@ -24,14 +26,14 @@ import utils
 
 TITLE = u'福利聚合'
 DESC = u'各种福利滑滑就有'
-LN= 5
+LN = 5
 RE_GIF = re.compile('.+\.gif$')
 logger = log.get_logger('fuli')
 
 app = Flask(__name__)
 
 
-def get_posts(page=1, ln=10, t='video'):
+def get_posts(page=1, ln=10, t='gif'):
     """Get posts of tumblr.
 
     Args:
@@ -44,27 +46,26 @@ def get_posts(page=1, ln=10, t='video'):
     """
     page = int(page)
     ln = int(ln)
-    items = []
     tumblr = db.get_collection('tumblr')
     skip = (page - 1) * ln
+    posts = []
     if t == 'video':
         items = tumblr.find(
             {'type': 'video', 'video_url': {'$exists': True}},
             projection={'video_url': True, 'thumbnail_url': True,
-                        'timestamp': True, 'blog_name': True, 'short_url': True,
-                        'duration': True},
+                        'timestamp': True, 'summary': True},
             skip=skip, limit=ln, sort=[('date', -1)]
         )
         for item in items:
-            dur = item['duration']
-            item['duration'] = '{0:02d}:{1:02d}'.format(*divmod(dur, 60))
+            if len(item['summary']) == 0:
+                del item['summary']
             item['date'] = utils.pretty_date(item['timestamp'])
-            yield item
+            item['src_tag'] = b64encode(item['video_url'])
+            posts.append(item)
     elif t == 'gif':
         items = tumblr.find(
             {'type': 'photo', 'photos.original_size.url': RE_GIF},
-            projection={'photos': True, 'timestamp': True, 'blog_name': True,
-                        'short_url': True},
+            projection={'photos': True, 'timestamp': True, 'summary': True},
             skip=skip, limit=ln, sort=[('date', -1)]
         )
         for item in items:
@@ -74,41 +75,59 @@ def get_posts(page=1, ln=10, t='video'):
             for photo in photos:
                 if not photo['original_size']['url'].endswith('.gif'):
                     continue
+                if len(item['summary']) == 0:
+                    del item['summary']
                 item['ori_size'] = photo['original_size']
-                yield item
+                item['alt_size'] = photo['alt_sizes'][2]
+                posts.append(item)
                 break
+    return posts
 
 
 @app.route('/')
 @app.route('/page')
 @app.route('/page/<t>')
 @app.route('/page/<t>/<p>')
-def page(t='video', p=1):
+def page(t='gif', p=1):
     """Page contents.
 
     Args:
-        t: the type of content. default is `video`
+        t: the type of content. default is `gif`
         p: the page number. default is 1.
     """
     logger.info(uri='page', p=p, t=t)
-    # all other invalid types are `video`
-    if t != 'gif':
-        t = 'video'
+    # all other invalid types are `gif`
+    if t != 'video':
+        t = 'gif'
     return render_template('page.html', title=TITLE, description=DESC,
                            cur_page=int(p), type=t)
 
 
 @app.route('/append/<t>/<p>')
-def append(t='video', p=1):
-    """Generate video for appending.
+def append(t='gif', p=1):
+    """Generate posts for appending.
 
     Args:
-        t: the type of content. default is `video`
+        t: the type of content. default is `gif`
         p: the page number. default is 1.
     """
     posts = get_posts(p, LN, t)
     logger.info(uri='append', p=p, t=t)
-    return render_template('append.html', posts=posts, type=t)
+    embed_code = render_template('append.html', posts=posts, type=t)
+    return json.dumps({'more': len(posts) == LN,
+                       'embed_code': embed_code,
+                       'len': len(posts)})
+
+
+@app.route('/player/<tag>')
+def player(tag):
+    """The page of player
+
+    Args:
+        tag: the b64encoded URL
+    """
+    url = b64decode(tag)
+    return render_template('player.html', url=url, title=TITLE)
 
 
 def main():
@@ -120,7 +139,7 @@ def main():
                         help='Start server in DEBUG mode', default=False)
     args = parser.parse_args()
 
-    app.run(debug=args.debug, port=8691)
+    app.run(debug=args.debug, port=8691, host="172.18.190.31")
 
 
 if __name__ == '__main__':

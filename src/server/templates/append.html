@@ -3,20 +3,28 @@
     <div class="card">
       <div valign="bottom" class="card-header color-white no-border no-padding">
         {% if type == 'gif' %}
-          <img src="{{ post['ori_size']['url'] }}" class="gif">
+          <img src="{{ post['alt_size']['url'] }}" class="gif">
         {% else %}
-          <video controls poster="{{ post['thumbnail_url'] }}" preload="none" src="{{ post['video_url'] }}">浏览器不支持, 请更换浏览器</video>
+          <div style="position: relative">
+            <a href="/player/{{ post['src_tag'] }}">
+              <img src="http://o6nkzmi2i.bkt.clouddn.com/play.png" class="play-icon" style="position: absolute;">
+            </a>
+              <img src="{{ post['thumbnail_url'] }}">
+          </div>
         {% endif %}
-
       </div>
-      <div class="card-content">
-        <div class="card-content-inner">
-          <p class="color-gray">发表于 {{ post['date'] }}</p>
+      {% if 'summary' in post %}
+        <div class="card-content">
+          <p>{{ post['summary'] }}</p>
         </div>
-      </div>
+      {% endif %}
       <div class="card-footer">
-        <a href="{{ post['short_url'] }}" class="link">原链</a>
-        <a href="//{{ post['blog_name'] }}.tumblr.com" class="link">{{ post['blog_name'] }}</a>
+        <p class="color-gray">发表于 {{ post['date'] }}</p>
+        {% if type == 'gif' %}
+          <a href="{{ post['ori_size']['url'] }}" class="link" download>高清</a>
+        {% elif type == 'video' %}
+          <a href="{{ post['video_url'] }}" class="link" download>下载</a>
+        {% endif %}
       </div>
     </div>
   {% endif %}

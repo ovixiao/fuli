@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block header %}
+<header class="bar bar-nav">
+  <a class="icon icon-left pull-left" href="/page/video"></a>
+  <h1 class="title">{{ title }}</h1>
+</header>
+{% endblock %}
+
+
+{% block cards %}
+<video controls preload="auto" src="{{ url }}" autoplay loop>浏览器不支持, 请更换浏览器</video>
+{% endblock %}

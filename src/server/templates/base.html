@@ -2,7 +2,7 @@
   <head>
     {% block head %}
     <title>{{ title }} - {{ description }}</title>
-    <meta name="keywords" content="宅男,福利,屌丝,撸,美女,性感,你懂的,你懂得,gif,动图,泳装,老司机,1024">
+    <meta name="keywords" content="宅男,福利,屌丝,撸,美女,性感,你懂的,你懂得,gif,动图,泳装,老司机,1024,AV,老师,护士,女优,优优,UU,女,饥渴,成人,好AV,haoleav,haole,且听风吟,福利吧,lu,lu福利,草榴,草留,小草,俺去也,无限福利,有点硬">
     <meta name="description" content="{{ description }}">
 
     <meta charset="utf-8">
@@ -17,22 +17,18 @@
     <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
     <script type='text/javascript' src='/static/func.js' charset='utf-8'></script>
     <script src="http://s95.cnzz.com/z_stat.php?id=1259005270&web_id=1259005270" language="JavaScript"></script>
+
+    <style>
+    body{max-width: 500px; margin: auto;}
+    video{width: 100%;}
+    img{width: 100%;}
+    </style>
     {% endblock %}
   </head>
 
   <body>
-    <header class="bar bar-nav"><h1 class="title">{{ title }}</h1></header>
-    <nav class="bar bar-tab">
-      <a class="tab-item external active" href="/page/video" id="video-tab">
-        <span class="icon icon-download"></span>
-        <span class="tab-label">视频</span>
-      </a>
-      <a class="tab-item external" href="/page/gif" id="gif-tab">
-        <span class="icon icon-emoji"></span>
-        <span class="tab-label">GIF</span>
-        <span class="badge">NEW</span>
-      </a>
-    </nav>
+    {% block header %}{% endblock %}
+    {% block navi %}{% endblock %}
     {% block cards %}{% endblock %}
   </body>
 

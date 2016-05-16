@@ -3,12 +3,30 @@
 {% block head %}
 {{ super() }}
 <style>
-body{max-width: 500px; margin: auto;}
 .infinite-scroll-preloader{margin-top:-20px;}
-video{width: 100%;}
 .card .card-header .gif{width: 100%;}
 #next-page{display: none};
 </style>
+{% endblock %}
+
+
+{% block header %}
+<header class="bar bar-nav"><h1 class="title">{{ title }}</h1></header>
+{% endblock %}
+
+
+{% block navi %}
+<nav class="bar bar-tab">
+  <a class="tab-item external" href="/page/gif" id="gif-tab">
+    <span class="icon icon-emoji"></span>
+    <span class="tab-label">GIF</span>
+    <span class="badge">NEW</span>
+  </a>
+  <a class="tab-item external active" href="/page/video" id="video-tab">
+    <span class="icon icon-download"></span>
+    <span class="tab-label">视频</span>
+  </a>
+</nav>
 {% endblock %}
 
 
@@ -28,6 +46,7 @@ curPage = {{ cur_page }};
 type = '{{ type }}';
 
 /* 无限加载 */
+var withContent = true;
 var loading = false;
 var maxPage = curPage + 2;
 $.initPage();
@@ -44,6 +63,9 @@ if (type == 'video') {
   $('#video-tab').attr('class', 'tab-item external');
   $('#gif-tab').attr('class', 'tab-item external active');
 }
+
+/* 全屏 */
+
 </script>
 
 {% endblock %}
