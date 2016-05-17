@@ -6,9 +6,11 @@ import sys
 import copy
 import argparse
 import ujson as json
+from datetime import datetime
 from base64 import b64encode, b64decode
 from flask import Flask, request
 from flask import render_template
+from pymongo.errors import DuplicateKeyError
 
 
 def add_python_path(path):
@@ -28,9 +30,74 @@ TITLE = u'福利聚合'
 DESC = u'各种福利滑滑就有'
 LN = 5
 RE_GIF = re.compile('.+\.gif$')
+RE_PHOTO = re.compile('.+\.(png|jpg|jpeg)$')
 logger = log.get_logger('fuli')
 
 app = Flask(__name__)
+
+
+def get_videos(tumblr, skip, ln, *args, **kwargs):
+    posts = []
+    items = tumblr.find(
+        {'type': 'video', 'video_url': {'$exists': True}},
+        projection={'video_url': True, 'thumbnail_url': True,
+                    'timestamp': True, 'summary': True},
+        skip=skip, limit=ln, sort=[('date', -1)]
+    )
+    for item in items:
+        if len(item['summary']) == 0:
+            del item['summary']
+        item['date'] = utils.pretty_date(item['timestamp'])
+        item['src_tag'] = b64encode(item['video_url'])
+        posts.append(item)
+
+    return posts
+
+
+def get_gifs(tumblr, skip, ln, *args, **kwargs):
+    posts = []
+    items = tumblr.find(
+        {'type': 'photo', 'photos.original_size.url': RE_GIF},
+        projection={'photos': True, 'timestamp': True, 'summary': True},
+        skip=skip, limit=ln, sort=[('date', -1)]
+    )
+    for item in items:
+        item['date'] = utils.pretty_date(item['timestamp'])
+        photos = item['photos']
+        del item['photos']
+        for photo in photos:
+            if not photo['original_size']['url'].endswith('.gif'):
+                continue
+            if len(item['summary']) == 0:
+                del item['summary']
+            item['ori_size'] = photo['original_size']
+            item['alt_size'] = photo['alt_sizes'][2]
+            posts.append(item)
+            break
+    return posts
+
+
+def get_photos(tumblr, skip, ln, *args, **kwargs):
+    posts = []
+    items = tumblr.find(
+        {'type': 'photo', 'photos.original_size.url': RE_PHOTO},
+        projection={'photos': True, 'timestamp': True, 'summary': True},
+        skip=skip, limit=ln, sort=[('date', -1)]
+    )
+    for item in items:
+        item['date'] = utils.pretty_date(item['timestamp'])
+        photos = item['photos']
+        del item['photos']
+        for photo in photos:
+            if photo['original_size']['url'].endswith('.gif'):
+                continue
+            if len(item['summary']) == 0:
+                del item['summary']
+            item['ori_size'] = photo['original_size']
+            item['alt_size'] = photo['alt_sizes'][2]
+            posts.append(item)
+            break
+    return posts
 
 
 def get_posts(page=1, ln=10, t='gif'):
@@ -39,7 +106,7 @@ def get_posts(page=1, ln=10, t='gif'):
     Args:
         page: the page number. default is 1.
         ln: the item number per page. default is 10.
-        t: the type of posts. default is `video`.
+        t: the type of posts. default is `gif`.
 
     Returns:
         return a generator including the processed post informations.
@@ -50,37 +117,12 @@ def get_posts(page=1, ln=10, t='gif'):
     skip = (page - 1) * ln
     posts = []
     if t == 'video':
-        items = tumblr.find(
-            {'type': 'video', 'video_url': {'$exists': True}},
-            projection={'video_url': True, 'thumbnail_url': True,
-                        'timestamp': True, 'summary': True},
-            skip=skip, limit=ln, sort=[('date', -1)]
-        )
-        for item in items:
-            if len(item['summary']) == 0:
-                del item['summary']
-            item['date'] = utils.pretty_date(item['timestamp'])
-            item['src_tag'] = b64encode(item['video_url'])
-            posts.append(item)
+        posts = get_videos(tumblr, skip, ln)
     elif t == 'gif':
-        items = tumblr.find(
-            {'type': 'photo', 'photos.original_size.url': RE_GIF},
-            projection={'photos': True, 'timestamp': True, 'summary': True},
-            skip=skip, limit=ln, sort=[('date', -1)]
-        )
-        for item in items:
-            item['date'] = utils.pretty_date(item['timestamp'])
-            photos = item['photos']
-            del item['photos']
-            for photo in photos:
-                if not photo['original_size']['url'].endswith('.gif'):
-                    continue
-                if len(item['summary']) == 0:
-                    del item['summary']
-                item['ori_size'] = photo['original_size']
-                item['alt_size'] = photo['alt_sizes'][2]
-                posts.append(item)
-                break
+        posts = get_gifs(tumblr, skip, ln)
+    elif t == 'photo':
+        posts = get_photos(tumblr, skip, ln)
+
     return posts
 
 
@@ -97,7 +139,7 @@ def page(t='gif', p=1):
     """
     logger.info(uri='page', p=p, t=t)
     # all other invalid types are `gif`
-    if t != 'video':
+    if t not in ('video', 'gif', 'photo'):
         t = 'gif'
     return render_template('page.html', title=TITLE, description=DESC,
                            cur_page=int(p), type=t)
@@ -128,6 +170,20 @@ def player(tag):
     """
     url = b64decode(tag)
     return render_template('player.html', url=url, title=TITLE)
+
+
+@app.route('/add_user/<user>')
+def add_user(user):
+    tumblr_user = db.get_collection('tumblr_user')
+    user = user.split(".", 1)[0]
+    try:
+        result = tumblr_user.insert({
+            'user': user,
+            'latest_update_date': datetime(1900, 1, 1),
+        })
+        return str(result)
+    except DuplicateKeyError:
+        return 'exists'
 
 
 def main():

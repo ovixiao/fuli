@@ -2,7 +2,7 @@
   {% if loop.length > 0 %}
     <div class="card">
       <div valign="bottom" class="card-header color-white no-border no-padding">
-        {% if type == 'gif' %}
+        {% if type == 'gif' or type == 'photo' %}
           <img src="{{ post['alt_size']['url'] }}" class="gif">
         {% else %}
           <div style="position: relative">
@@ -22,11 +22,6 @@
       {% endif %}
       <div class="card-footer">
         <p class="color-gray">发表于 {{ post['date'] }}</p>
-        {% if type == 'gif' %}
-          <a href="{{ post['ori_size']['url'] }}" class="link" download>高清</a>
-        {% elif type == 'video' %}
-          <a href="{{ post['video_url'] }}" class="link" download>下载</a>
-        {% endif %}
       </div>
     </div>
   {% endif %}

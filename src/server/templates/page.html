@@ -20,6 +20,10 @@
   <a class="tab-item external" href="/page/gif" id="gif-tab">
     <span class="icon icon-emoji"></span>
     <span class="tab-label">GIF</span>
+  </a>
+  <a class="tab-item external" href="/page/photo" id="photo-tab">
+    <span class="icon icon-picture"></span>
+    <span class="tab-label">照片</span>
     <span class="badge">NEW</span>
   </a>
   <a class="tab-item external active" href="/page/video" id="video-tab">
@@ -59,9 +63,15 @@ $(document).on('infinite', '.infinite-scroll-bottom', infinite_scroll);
 if (type == 'video') {
   $('#video-tab').attr('class', 'tab-item external active');
   $('#gif-tab').attr('class', 'tab-item external');
+  $('#photo-tab').attr('class', 'tab-item external');
 } else if (type == 'gif') {
   $('#video-tab').attr('class', 'tab-item external');
   $('#gif-tab').attr('class', 'tab-item external active');
+  $('#photo-tab').attr('class', 'tab-item external');
+} else if (type == 'photo') {
+  $('#video-tab').attr('class', 'tab-item external');
+  $('#gif-tab').attr('class', 'tab-item external');
+  $('#photo-tab').attr('class', 'tab-item external active');
 }
 
 /* 全屏 */
