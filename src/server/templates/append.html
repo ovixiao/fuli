@@ -6,7 +6,7 @@
           <img src="{{ post['alt_size']['url'] }}" class="gif">
         {% else %}
           <div style="position: relative">
-            <a href="/player/{{ post['src_tag'] }}">
+            <a href="/player/{{ post['src_tag'] }}?p={{ p }}&t={{ type }}">
               <img src="http://o6nkzmi2i.bkt.clouddn.com/play.png" class="play-icon" style="position: absolute;">
             </a>
               <img src="{{ post['thumbnail_url'] }}">

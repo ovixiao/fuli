@@ -94,7 +94,7 @@ def get_photos(tumblr, skip, ln, *args, **kwargs):
             if len(item['summary']) == 0:
                 del item['summary']
             item['ori_size'] = photo['original_size']
-            item['alt_size'] = photo['alt_sizes'][2]
+            item['alt_size'] = photo['original_size']
             posts.append(item)
             break
     return posts
@@ -129,7 +129,7 @@ def get_posts(page=1, ln=10, t='gif'):
 @app.route('/')
 @app.route('/page')
 @app.route('/page/<t>')
-@app.route('/page/<t>/<p>')
+@app.route('/page/<t>/<int:p>')
 def page(t='gif', p=1):
     """Page contents.
 
@@ -145,7 +145,7 @@ def page(t='gif', p=1):
                            cur_page=int(p), type=t)
 
 
-@app.route('/append/<t>/<p>')
+@app.route('/append/<t>/<int:p>')
 def append(t='gif', p=1):
     """Generate posts for appending.
 
@@ -155,7 +155,7 @@ def append(t='gif', p=1):
     """
     posts = get_posts(p, LN, t)
     logger.info(uri='append', p=p, t=t)
-    embed_code = render_template('append.html', posts=posts, type=t)
+    embed_code = render_template('append.html', posts=posts, type=t, p=p)
     return json.dumps({'more': len(posts) == LN,
                        'embed_code': embed_code,
                        'len': len(posts)})
@@ -169,7 +169,10 @@ def player(tag):
         tag: the b64encoded URL
     """
     url = b64decode(tag)
-    return render_template('player.html', url=url, title=TITLE)
+    t = request.args.get('t')
+    p = request.args.get('p')
+    return render_template('player.html', url=url, title=TITLE,
+                           description=DESC, t=t, p=p)
 
 
 @app.route('/add_user/<user>')
