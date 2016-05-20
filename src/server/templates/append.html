@@ -17,7 +17,9 @@
       {% endif %}
       <div class="card-footer">
         <p class="color-gray">发表于 {{ post['date'] }}</p>
-        <a class="button button-round button-warning" href="/player/{{ post['src_tag'] }}?p={{ p }}&t={{ type }}">播放</a>
+        {% if type == 'video' %}
+          <a class="button button-round button-warning" href="/player/{{ post['src_tag'] }}?p={{ p }}&t={{ type }}">播放</a>
+        {% endif %}
       </div>
     </div>
   {% endif %}
