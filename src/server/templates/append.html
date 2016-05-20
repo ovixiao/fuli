@@ -5,12 +5,7 @@
         {% if type == 'gif' or type == 'photo' %}
           <img src="{{ post['alt_size']['url'] }}" class="gif">
         {% else %}
-          <div style="position: relative">
-            <a href="/player/{{ post['src_tag'] }}?p={{ p }}&t={{ type }}">
-              <img src="http://o6nkzmi2i.bkt.clouddn.com/play.png" class="play-icon" style="position: absolute;">
-            </a>
-              <img src="{{ post['thumbnail_url'] }}">
-          </div>
+            <img src="{{ post['thumbnail_url'] }}">
         {% endif %}
       </div>
       {% if 'summary' in post %}
@@ -22,6 +17,7 @@
       {% endif %}
       <div class="card-footer">
         <p class="color-gray">发表于 {{ post['date'] }}</p>
+        <a class="button button-round button-warning" href="/player/{{ post['src_tag'] }}?p={{ p }}&t={{ type }}">播放</a>
       </div>
     </div>
   {% endif %}

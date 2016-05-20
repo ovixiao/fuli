@@ -96,6 +96,21 @@ class Tumblr(object):
         except BreakThroughExce:
             pass
 
+
+    def get_following(self):
+        info = self._client.info()
+        total = info['user']['following']
+        limit = 20  # 20 following per request
+        for i in xrange(int(math.ceil(total / float(limit)))):
+            offset = i * limit
+            following = self._client.following(limit=limit, offset=offset)
+            for blog in following['blogs']:
+                try:
+                    yield blog['uuid']
+                except:
+                    continue
+
+
     def update(self):
         users = self.get_users()
         self._logger.info('start_update')

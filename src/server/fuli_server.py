@@ -72,7 +72,7 @@ def get_gifs(tumblr, skip, ln, *args, **kwargs):
             if len(item['summary']) == 0:
                 del item['summary']
             item['ori_size'] = photo['original_size']
-            item['alt_size'] = photo['alt_sizes'][2]
+            item['alt_size'] = photo['alt_sizes'][1]
             posts.append(item)
             break
     return posts
@@ -95,7 +95,7 @@ def get_photos(tumblr, skip, ln, *args, **kwargs):
             if len(item['summary']) == 0:
                 del item['summary']
             item['ori_size'] = photo['original_size']
-            item['alt_size'] = photo['original_size']
+            item['alt_size'] = photo['alt_sizes'][1]
             posts.append(item)
             break
     return posts
@@ -179,10 +179,10 @@ def player(tag):
 
 @app.route('/add_user/<user>')
 def add_user(user):
-    tumblr_user = db.get_collection('tumblr_user')
+    tumblr_users = db.get_collection('tumblr_users')
     user = user.split(".", 1)[0]
     try:
-        result = tumblr_user.insert({
+        result = tumblr_users.insert({
             'user': user,
             'latest_update_date': datetime(1900, 1, 1),
         })

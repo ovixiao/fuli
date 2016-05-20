@@ -8,17 +8,18 @@ import subprocess
 
 CACHE_ROOT = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
-    '../server/static/cache',
+    '../../cache',
 )
 if not os.path.exists(CACHE_ROOT):
     os.mkdir(CACHE_ROOT)
+
 
 def get_cache_url(url):
     file_name = url.rsplit('/', 1)[-1]
     file_path = os.path.join(CACHE_ROOT, file_name)
     # file exists, return directly
     if os.path.exists(file_path):
-        return '/static/cache/' + file_name
+        return os.path.join('/cache', file_name)
     else:
         tmp_path = file_path + '.tmp'
         # delete old one
