@@ -80,9 +80,10 @@ class Tumblr(object):
                 posts = self._client.posts(user, limit=limit, offset=offset)
                 for post in posts['posts']:
                     try:
-                        # ignore those that later than 1 hour
-                        if now - post['timestamp'] > 3600:
+                        # ignore those that later than 30 minutes
+                        if now - post['timestamp'] > 1800:
                             raise BreakThroughExce()
+
 
                         self._tumblr.insert(post)
                     except pymongo.errors.DuplicateKeyError:
