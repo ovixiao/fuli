@@ -50,6 +50,7 @@ def get_videos(tumblr, skip, ln, *args, **kwargs):
             del item['summary']
         item['date'] = utils.pretty_date(item['timestamp'])
         item['src_tag'] = b64encode(item['video_url'])
+        item['og_img'] = b64encode(item['thumbnail_url'])
         posts.append(item)
 
     return posts
@@ -155,8 +156,8 @@ def append(t='gif', p=1):
         p: the page number. default is 1.
     """
     posts = get_posts(p, LN, t)
-    logger.info(uri='append', p=p, t=t)
     embed_code = render_template('append.html', posts=posts, type=t, p=p)
+    logger.info(uri='append', p=p, t=t)
     return json.dumps({'more': len(posts) == LN,
                        'embed_code': embed_code,
                        'len': len(posts)})
@@ -173,8 +174,9 @@ def player(tag):
     url = cache.get_cache_url(url)
     t = request.args.get('t')
     p = request.args.get('p')
+    og_img = b64decode(request.args.get('og_img'))
     return render_template('player.html', url=url, title=TITLE,
-                           description=DESC, t=t, p=p)
+                           description=DESC, t=t, p=p, og_img=og_img)
 
 
 @app.route('/add_user/<user>')

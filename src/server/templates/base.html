@@ -1,5 +1,6 @@
 <html>
   <head>
+    {% block head %}
     <title>{{ title }} - {{ description }}</title>
     <meta name="keywords" content="福利聚合,福利视频,福利gif,福利图片">
     <meta name="description" content="{{ description }}">
@@ -17,6 +18,7 @@
     <script type='text/javascript' src='/static/func.js' charset='utf-8'></script>
     <script src="http://s95.cnzz.com/z_stat.php?id=1259005270&web_id=1259005270" language="JavaScript"></script>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
+    {% endblock %}
   </head>
 
   <body>

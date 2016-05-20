@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 
+
+{% block head %}
+{{ super() }}
+<meta property="og:image" content="{{ og_img }}" />
+{% endblock %}
+
+
 {% block header %}
 <header class="bar bar-nav">
   <a class="icon icon-left pull-left" href="/page/video/{{ p }}"></a>
@@ -10,6 +17,6 @@
 
 {% block cards %}
 <div class="content" data-distance="50">
-<video controls preload="auto" src="{{ url }}" autoplay loop>浏览器不支持, 请更换浏览器</video>
+  <video controls preload="auto" src="{{ url }}" autoplay loop>浏览器不支持, 请更换浏览器</video>
 </div>
 {% endblock %}
