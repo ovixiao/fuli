@@ -25,6 +25,7 @@ add_python_path('../libs')
 import db
 import log
 import utils
+import cache
 
 TITLE = u'福利聚合'
 DESC = u'各种福利滑滑就有'
@@ -169,6 +170,7 @@ def player(tag):
         tag: the b64encoded URL
     """
     url = b64decode(tag)
+    url = cache.get_cache_url(url)
     t = request.args.get('t')
     p = request.args.get('p')
     return render_template('player.html', url=url, title=TITLE,
