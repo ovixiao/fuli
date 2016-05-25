@@ -4,6 +4,7 @@ import db
 import log
 import time
 import pymongo
+import cache
 import pytumblr
 from math import ceil
 from datetime import datetime
@@ -84,8 +85,14 @@ class Tumblr(object):
                         if now - post['timestamp'] > 1800:
                             raise BreakThroughExce()
 
-
                         self._tumblr.insert(post)
+
+                        # cache resources
+                        if post['type'] == 'photo':
+                            cache.get_cache_url(post['alt_sizes'][1]['url'])
+                        elif post['type'] == 'video':
+                            cache.get_cache_url(post['video_url'])
+                            cache.get_cache_url(post['thumbnail_url'])
                     except pymongo.errors.DuplicateKeyError:
                         continue
                     else:

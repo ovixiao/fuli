@@ -48,6 +48,8 @@ def get_videos(tumblr, skip, ln, *args, **kwargs):
     for item in items:
         if len(item['summary']) == 0:
             del item['summary']
+        item['video_url'] = cache.get_cache_url(item['video_url'])
+        item['thumbnail_url'] = cache.get_cache_url(item['thumbnail_url'])
         item['date'] = utils.pretty_date(item['timestamp'])
         item['src_tag'] = b64encode(item['video_url'])
         item['og_img'] = b64encode(item['thumbnail_url'])
@@ -72,7 +74,7 @@ def get_gifs(tumblr, skip, ln, *args, **kwargs):
                 continue
             if len(item['summary']) == 0:
                 del item['summary']
-            item['ori_size'] = photo['original_size']
+            photo['alt_sizes'][1]['url'] = cache.get_cache_url(photo['alt_sizes'][1]['url'])
             item['alt_size'] = photo['alt_sizes'][1]
             posts.append(item)
             break
@@ -95,7 +97,7 @@ def get_photos(tumblr, skip, ln, *args, **kwargs):
                 continue
             if len(item['summary']) == 0:
                 del item['summary']
-            item['ori_size'] = photo['original_size']
+            photo['alt_sizes'][1]['url'] = cache.get_cache_url(photo['alt_sizes'][1]['url'])
             item['alt_size'] = photo['alt_sizes'][1]
             posts.append(item)
             break
@@ -132,27 +134,27 @@ def get_posts(page=1, ln=10, t='gif'):
 @app.route('/page')
 @app.route('/page/<t>')
 @app.route('/page/<t>/<int:p>')
-def page(t='gif', p=1):
+def page(t='video', p=1):
     """Page contents.
 
     Args:
-        t: the type of content. default is `gif`
+        t: the type of content. default is `video`
         p: the page number. default is 1.
     """
     logger.info(uri='page', p=p, t=t)
-    # all other invalid types are `gif`
+    # all other invalid types are `video`
     if t not in ('video', 'gif', 'photo'):
-        t = 'gif'
+        t = 'video'
     return render_template('page.html', title=TITLE, description=DESC,
                            cur_page=int(p), type=t)
 
 
 @app.route('/append/<t>/<int:p>')
-def append(t='gif', p=1):
+def append(t='video', p=1):
     """Generate posts for appending.
 
     Args:
-        t: the type of content. default is `gif`
+        t: the type of content. default is `video`
         p: the page number. default is 1.
     """
     posts = get_posts(p, LN, t)
@@ -171,7 +173,6 @@ def player(tag):
         tag: the b64encoded URL
     """
     url = b64decode(tag)
-    url = cache.get_cache_url(url)
     t = request.args.get('t')
     p = request.args.get('p')
     og_img = b64decode(request.args.get('og_img'))
