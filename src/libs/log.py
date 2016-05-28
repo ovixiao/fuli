@@ -98,6 +98,17 @@ class Logger(logging.Logger):
         exc = exc[exc_index + 1:]
         return file, lineno, func, msg, exc
 
+    def exc_log(self, *arg, **kwargs):
+        file, lineno, func, msg, exc = self.exc_info()
+        if self.isEnabledFor(logging.ERROR):
+            kwargs['file'] = file
+            kwargs['lineno'] = lineno
+            kwargs['func'] = func
+            kwargs['msg'] = msg
+            kwargs['exc'] = exc
+            msg = self._compose_msg(*arg, **kwargs)
+            self._log(logging.ERROR, msg, [])
+
 
 class MultiProcessingTimedRotatingFileHandler(TimedRotatingFileHandler):
     """Logger handler suit for multi processing with time rotate

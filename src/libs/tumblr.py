@@ -69,6 +69,22 @@ class Tumblr(object):
         item['latest_update_date'] = datetime.now()
         return self._users.save(item)
 
+    def make_cache(self, post):
+        url_list = []
+        # cache resources
+        if post['type'] == 'photo':
+            url_list.append(post['alt_sizes'][1]['url'])
+        elif post['type'] == 'video':
+            url_list.append(post['video_url'])
+            url_list.append(post['thumbnail_url'])
+
+        for url in urls:
+            try:
+                stat = cache.cache_remote(url)
+                self._logger.info('cache', url=url, stat=stat)
+            except:
+                self._logger.exc_log('cache', url=url)
+
     def get_posts(self, user):
         # get the total posts
         info = self._client.blog_info(user)
@@ -86,13 +102,7 @@ class Tumblr(object):
                             raise BreakThroughExce()
 
                         self._tumblr.insert(post)
-
-                        # cache resources
-                        if post['type'] == 'photo':
-                            cache.get_cache_url(post['alt_sizes'][1]['url'])
-                        elif post['type'] == 'video':
-                            cache.get_cache_url(post['video_url'])
-                            cache.get_cache_url(post['thumbnail_url'])
+                        self.make_cache(post)
                     except pymongo.errors.DuplicateKeyError:
                         continue
                     else:
@@ -126,6 +136,7 @@ class Tumblr(object):
             self._logger.info('update_user', user=user)
             self.get_posts(user)
             self.update_user(user_info)
+            break
 
 
 if __name__ == '__main__':
