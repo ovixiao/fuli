@@ -172,8 +172,9 @@ def player(tag):
     url = b64decode(tag)
     t = request.args.get('t')
     p = request.args.get('p')
+    og_img = b64decode(request.args.get('og_img'))
     return render_template('player.html', url=url, title=TITLE,
-                           description=DESC, t=t, p=p)
+                           description=DESC, t=t, p=p, og_img=og_img)
 
 
 @app.route('/add_user/<user>')
