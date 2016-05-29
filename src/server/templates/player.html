@@ -16,7 +16,11 @@
 
 
 {% block cards %}
-<div class="content" data-distance="50">
-  <video poster="{{ og_img }}" controls preload="auto" src="{{ url }}" loop>浏览器不支持, 请更换浏览器</video>
+<div class="content">
+  <div class="card">
+    <div valign="bottom" class="card-header color-white no-border no-padding">
+      <video poster="{{ og_img }}" controls preload="auto" src="{{ url }}" loop>浏览器不支持, 请更换浏览器</video>
+    </div>
+  </div>
 </div>
 {% endblock %}

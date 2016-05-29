@@ -42,17 +42,14 @@ def get_videos(tumblr, skip, ln, *args, **kwargs):
     items = tumblr.find(
         {'type': 'video', 'video_url': {'$exists': True}},
         projection={'video_url': True, 'thumbnail_url': True,
-                    'timestamp': True, 'summary': True},
+                    'timestamp': True},
         skip=skip, limit=ln, sort=[('date', -1)]
     )
     for item in items:
-        if len(item['summary']) == 0:
-            del item['summary']
         item['video_url'] = cache.get_cache_url(item['video_url'])
         item['thumbnail_url'] = cache.get_cache_url(item['thumbnail_url'])
         item['date'] = utils.pretty_date(item['timestamp'])
         item['src_tag'] = b64encode(item['video_url'])
-        item['og_img'] = b64encode(item['thumbnail_url'])
         posts.append(item)
 
     return posts
@@ -175,9 +172,8 @@ def player(tag):
     url = b64decode(tag)
     t = request.args.get('t')
     p = request.args.get('p')
-    og_img = b64decode(request.args.get('og_img'))
     return render_template('player.html', url=url, title=TITLE,
-                           description=DESC, t=t, p=p, og_img=og_img)
+                           description=DESC, t=t, p=p)
 
 
 @app.route('/add_user/<user>')

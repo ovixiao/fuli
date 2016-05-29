@@ -101,8 +101,8 @@ class Tumblr(object):
                         if now - post['timestamp'] > 1800:
                             raise BreakThroughExce()
 
-                        self._tumblr.insert(post)
                         self.make_cache(post)
+                        self._tumblr.insert(post)
                     except pymongo.errors.DuplicateKeyError:
                         continue
                     else:
