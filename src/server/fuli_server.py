@@ -50,6 +50,7 @@ def get_videos(tumblr, skip, ln, *args, **kwargs):
         item['thumbnail_url'] = cache.get_cache_url(item['thumbnail_url'])
         item['date'] = utils.pretty_date(item['timestamp'])
         item['src_tag'] = b64encode(item['video_url'])
+        item['og_img'] = b64encode(item['thumbnail_url'])
         posts.append(item)
 
     return posts

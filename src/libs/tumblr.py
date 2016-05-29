@@ -71,14 +71,17 @@ class Tumblr(object):
 
     def make_cache(self, post):
         url_list = []
-        # cache resources
-        if post['type'] == 'photo':
-            url_list.append(post['alt_sizes'][1]['url'])
-        elif post['type'] == 'video':
-            url_list.append(post['video_url'])
-            url_list.append(post['thumbnail_url'])
+        try:
+            # cache resources
+            if post['type'] == 'photo':
+                url_list.append(post['photos'][0]['alt_sizes'][1]['url'])
+            elif post['type'] == 'video':
+                url_list.append(post['video_url'])
+                url_list.append(post['thumbnail_url'])
+        except KeyError:
+            pass
 
-        for url in urls:
+        for url in url_list:
             try:
                 stat = cache.cache_remote(url)
                 self._logger.info('cache', url=url, stat=stat)
